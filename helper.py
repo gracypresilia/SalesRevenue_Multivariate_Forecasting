@@ -29,12 +29,12 @@ def avg_dfitem(item, df, dfs, mat, mode=''):
 def binary_mean_diff(df, condition, mode):
     mean_pos_sales = df.loc[df[condition] == 1, 'net_units'].mean() if mode=='sales' or mode=='both' else 0
     mean_neg_sales = df.loc[df[condition] == 0, 'net_units'].mean() if mode=='sales' or mode=='both' else 0
-    pct_sales = (mean_pos_sales - mean_neg_sales) / mean_pos_sales * 100 if mode=='sales' or mode=='both' else 0
+    pct_sales = (mean_pos_sales - mean_neg_sales) / mean_neg_sales * 100 if mode=='sales' or mode=='both' else 0
 
     mean_pos_rev = df.loc[df[condition] == 1, 'net_revenue'].mean() if mode=='revenue' or mode=='both' else 0
     mean_neg_rev = df.loc[df[condition] == 0, 'net_revenue'].mean() if mode=='revenue' or mode=='both' else 0
-    pct_rev = (mean_pos_rev - mean_neg_rev) / mean_pos_rev * 100 if mode=='revenue' or mode=='both' else 0
-    
+    pct_rev = (mean_pos_rev - mean_neg_rev) / mean_neg_rev * 100 if mode=='revenue' or mode=='both' else 0
+
     if mode=='sales':
         return pct_sales
     elif mode=='revenue':
@@ -44,7 +44,7 @@ def binary_mean_diff(df, condition, mode):
     else:
         mean_pos_mode = df.loc[df[condition] == 1, mode].mean()
         mean_neg_mode = df.loc[df[condition] == 0, mode].mean()
-        pct_mode = (mean_pos_mode - mean_neg_mode) / mean_pos_mode * 100
+        pct_mode = (mean_pos_mode - mean_neg_mode) / mean_neg_mode * 100
         return pct_mode
 
 def df_base_diff(df):
@@ -66,6 +66,10 @@ def dtm(date):
     date = date.str.replace(r'-\d{2}$', '', regex=True)
     return date
 
+def pad_ylim(ax, factor=1.1):
+    lo, hi = ax.get_ylim()
+    ax.set_ylim(lo, hi * factor)
+
 def plot_bar(df, x, y, title, xlabel=None, ylabel=None, xtick1=None, xtick2=None, ax=None):
     if ax is None:
         fig, ax = plt.subplots(figsize=(5,4))
@@ -82,6 +86,25 @@ def plot_bar(df, x, y, title, xlabel=None, ylabel=None, xtick1=None, xtick2=None
     if xtick1!=None and xtick2!=None:
         ax.set_xlabel('')
         ax.set_xticks([0, 1], [xtick1, xtick2])
+    return ax
+
+def plot_stackedbar(pivot, title, xlabel=None, ylabel=None, n_xticks=None, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(5,4))
+    pivot.plot(
+        kind='bar', stacked=True,
+        ax=ax, 
+        color=sns.color_palette('crest', n_colors=2)
+    )
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    # Ticks settings.
+    if n_xticks!=None:
+        ax.set_xticks(np.arange(n_xticks))
+        ax.set_xticklabels(np.arange(1, n_xticks+1), rotation='horizontal', ha='center')
+    # Y-axis limit setting.
+    pad_ylim(ax)
     return ax
 
 def separate(df, dfs, category):
