@@ -9,6 +9,9 @@ importlib.reload(helper)
 # %%
 from helper import *
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
 # %% [markdown]
 # # Data Preprocessing
@@ -21,8 +24,8 @@ raw_df = pd.read_csv('./data/retail_sales_synthetic.csv')
 df = raw_df.copy()  # Copy to ensure every change made in this code doesn't affect the raw data.
 
 # %%
-# It will be truncated if we printed it as df.head() or df.describe() so we can't check (see) all columns.
-# In order to avoid that, we need to print it partially.
+# df.head()/df.describe() truncates columns.
+# In order to inspect everything, we need to print in parts.
 n_col = len(df.columns)
 
 # %%
@@ -73,14 +76,23 @@ df_1.loc[df_1['is_holiday'] > 0, 'is_holiday'] = 1
 print(df_1.head())
 
 # %% [markdown]
-# Find the correlation coefficients between variables (`is_holiday`, `net_units`, and `net_revenue`) to analyze the effect of holiday to daily sales and revenue.
+# Find the mean difference percentages between variables (`is_holiday`, `net_units`, and `net_revenue`) to analyze the effect of holiday to daily sales and revenue.
 
 # %%
-corr_1_1 = df_1[['is_holiday', 'net_units', 'net_revenue']].corr()
-print(corr_1_1)
+bmd_holiday_daily = binary_mean_diff(df_1, 'is_holiday', 'both')
+print(f"Effect of holiday on daily sales: {bmd_holiday_daily['sales_pct_diff']:.2f}%")
+print(f"Effect of holiday on daily revenue: {bmd_holiday_daily['rev_pct_diff']:.2f}%")
+
+# %%
+# Visualize results as barplot comparison.
+fig, ax = plt.subplots(1, 2, figsize=(10,4))
+plot_bar(df_1, 'is_holiday', 'net_units', 'Average Daily Sales', 'Sales', 'Not Holiday', 'Holiday', ax=ax[0])
+plot_bar(df_1, 'is_holiday', 'net_revenue', 'Average Daily Revenue', 'Revenue', 'Not Holiday', 'Holiday', ax=ax[1])
+plt.tight_layout()
+plt.show()
 
 # %% [markdown]
-# Based on the results, the presence of holiday doesn't significantly affect the overall daily sales and revenue.
+# Based on the results, holidays increase overall daily sales by 27,6% and revenue by 25,45%.
 
 # %% [markdown]
 # ### Holiday Effect Towards Monthly Sales and Revenue
@@ -101,17 +113,26 @@ df_1 = df_1.groupby(df_1.index).sum()
 print(df_1.head())
 
 # %% [markdown]
-# Find the correlation coefficients between variables (`is_holiday`, `net_units`, and `net_revenue`).
+# Find the mean difference percentages between variables (`is_holiday`, `net_units`, and `net_revenue`) to analyze the effect of holiday to monthly sales and revenue.
 
 # %%
-corr_1_2 = df_1[['is_holiday', 'net_units', 'net_revenue']].corr()
-print(corr_1_2)
+bmd_holiday_monthly = binary_mean_diff(df_1, 'is_holiday', 'both')
+print(f"Effect of holiday on monthly sales: {bmd_holiday_monthly['sales_pct_diff']:.2f}%")
+print(f"Effect of holiday on monthly revenue: {bmd_holiday_monthly['rev_pct_diff']:.2f}%")
+
+# %%
+# Visualize results as barplot comparison.
+fig, ax = plt.subplots(1, 2, figsize=(10,4))
+plot_bar(df_1, 'is_holiday', 'net_units', 'Average Monthly Sales', 'Sales', 'Not Holiday', 'Holiday', ax=ax[0])
+plot_bar(df_1, 'is_holiday', 'net_revenue', 'Average Monthly Revenue', 'Revenue', 'Not Holiday', 'Holiday', ax=ax[1])
+plt.tight_layout()
+plt.show()
 
 # %% [markdown]
-# Based on the results, the presence of holiday doesn't significantly affect the overall monthly sales and revenue. However, the effect shows more than the daily analysis in the previous section.
+# Based on the results, holidays increase overall monthly sales and revenue by around 7%, less significant compared to its impact towards daily view.
 
 # %% [markdown]
-# ## 2. Is there any change in product's category trend during no-holiday months and holiday months?
+# ## 2. Is there any change in product category trend during no-holiday months and holiday months?
 
 # %% [markdown]
 # Get the necessary columns from the preprocessed data.
@@ -130,7 +151,7 @@ df_2['date'] = dtm(df_2['date'])
 print(df_2.head())
 
 # %% [markdown]
-# Count `net_units` by month and product's category while keeping the `is_holiday` properties.
+# Count `net_units` by month and product category while keeping the `is_holiday` properties.
 
 # %%
 df_2 = df_2.groupby(['date', 'category'], as_index=False)[['is_holiday','net_units']].sum()
@@ -140,21 +161,21 @@ df_2.loc[df_2['is_holiday'] > 0, 'is_holiday'] = 1
 print(df_2.head())
 
 # %% [markdown]
-# Only returns the highest sales product's category for each month.
+# Only returns the highest sales product category for each month.
 
 # %%
 df_2 = df_2.loc[df_2.groupby('date')['net_units'].idxmax()]
 print(df_2.head())
 
 # %% [markdown]
-# Only returns the mode of the highest sales product's category across all of the no-holiday months and all of the holiday months.
+# Return the mode of top categories across holiday and non-holiday months.
 
 # %%
 df_2 = df_2.groupby('is_holiday')['category'].agg(lambda x: x.mode()[0])
 print(df_2.head())
 
 # %% [markdown]
-# As seen in the two latest dataframes, there's no change in product's category trend during no-holiday months and holiday months. Both product's category trends are clothing.
+# As seen in the two latest dataframes, there's no change in product category trend during no-holiday months and holiday months. Both product category trends are clothing.
 
 # %% [markdown]
 # ## 3. Does the weekend status affect overall daily sales and revenue?
@@ -179,14 +200,23 @@ df_3.loc[df_3['weekend'] > 0, 'weekend'] = 1
 print(df_3.head())
 
 # %% [markdown]
-# Find the correlation coefficients between variables (`weekend`, `net_units`, and `net_revenue`) to analyze the effect of weekend to daily sales and revenue.
+# Find the mean difference percentages between variables (`weekend`, `net_units`, and `net_revenue`) to analyze the effect of weekend to daily sales and revenue.
 
 # %%
-corr_2 = df_3[['weekend', 'net_units', 'net_revenue']].corr()
-print(corr_2)
+bmd_weekend = binary_mean_diff(df_3, 'weekend', 'both')
+print(f"Effect of weekend on daily sales: {bmd_weekend['sales_pct_diff']:.2f}%")
+print(f"Effect of weekend on daily revenue: {bmd_weekend['rev_pct_diff']:.2f}%")
+
+# %%
+# Visualize results as barplot comparison.
+fig, ax = plt.subplots(1, 2, figsize=(10,4))
+plot_bar(df_3, 'weekend', 'net_units', 'Average Weekend Sales', 'Sales', 'Weekday', 'Weekend', ax=ax[0])
+plot_bar(df_3, 'weekend', 'net_revenue', 'Average Weekend Revenue', 'Revenue', 'Weekday', 'Weekend', ax=ax[1])
+plt.tight_layout()
+plt.show()
 
 # %% [markdown]
-# Based on the results, the weekend status quite significantly affect the overall daily sales and revenue.
+# Based on the results, the weekend increase overall daily sales and revenue by around 22,7%, a big number but still less significant than holiday.
 
 # %% [markdown]
 # ## 4. How is the overall day-by-day sales and revenue trend during a week?
@@ -208,11 +238,46 @@ print(df_4.head())
 df_4 = df_4.groupby(df_4['day_of_week']).mean()
 print(df_4)
 
-# %% [markdown]
-# The results show that sales and revenue are higher during weekends. This shows a consistent result between this section and previous section, the weekend status quite significantly affect the overall daily sales and revenue.
+# %%
+# Visualize results as barplot comparison.
+fig, ax = plt.subplots(1, 2, figsize=(10,4))
+
+sns.barplot(
+        data=df, x='day_of_week', y='net_units', ax=ax[0],
+        errorbar=None, legend=False,
+        hue='day_of_week', palette='crest'
+    )
+ax[0].set_title('Average Sales of A Week')
+ax[0].set_xlabel('Day of The Week')
+ax[0].set_ylabel('Sales')
+ax[0].set_xticks(
+    [0, 1, 2, 3, 4, 5, 6], 
+    ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    rotation=45
+)
+
+sns.barplot(
+        data=df, x='day_of_week', y='net_revenue', ax=ax[1],
+        errorbar=None, legend=False,
+        hue='day_of_week', palette='crest'
+    )
+ax[1].set_title('Average Revenue of A Week')
+ax[1].set_xlabel('Day of The Week')
+ax[1].set_ylabel('Revenue')
+ax[1].set_xticks(
+    [0, 1, 2, 3, 4, 5, 6], 
+    ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    rotation=45
+)
+
+plt.tight_layout()
+plt.show()
 
 # %% [markdown]
-# ## 5. Does the store type and area affect the customer experience, which lead to store's sales and revenue?
+# The results show that sales and revenue are higher during weekends. This shows a consistent result between this section and previous section, the weekend status affects the overall daily sales and revenue.
+
+# %% [markdown]
+# ## 5. Does the store type and area affect customer experience and, in turn, store sales?
 
 # %% [markdown]
 # Get the necessary columns from the preprocessed data.
@@ -241,8 +306,17 @@ df_5_type = df_5.drop(columns='store_area_sqft').copy()
 df_5_type = df_5_type.groupby(df_5_type['store_type']).mean()
 print(df_5_type)
 
+# %%
+# Visualize results as barplot comparison.
+fig, ax = plt.subplots(1, 3, figsize=(15,4))
+plot_bar(df_5_type, 'store_type', 'avg_rating', 'Average Customer Ratings', xlabel='Store Type', ylabel='Customer Ratings', ax=ax[0])
+plot_bar(df_5_type, 'store_type', 'net_units', 'Average Store Sales', xlabel='Store Type', ylabel='Sales', ax=ax[1])
+plot_bar(df_5_type, 'store_type', 'net_revenue', 'Average Store Revenue', xlabel='Store Type', ylabel='Revenue', ax=ax[2])
+plt.tight_layout()
+plt.show()
+
 # %% [markdown]
-# The result above shows that store type, though it doesn't significantly affect customer experiences, quite significantly affect store's sales and revenue. Store type C has the highest rank, but store type A has the highest net sales and revenue.
+# Store type shows clear differences in sales and revenue, while customer ratings vary little by type. Store type C has the highest rank, but store type A has the highest net sales and revenue.
 
 # %% [markdown]
 # ### Store Area (in sqft) Effect Towards Average Customer Experiences, Sales, and Revenue
@@ -254,8 +328,17 @@ print(df_5_type)
 df_5_area = df_5[['store_area_sqft', 'avg_rating', 'net_units', 'net_revenue']].corr()
 print(df_5_area)
 
+# %%
+# Visualize results as heatmap correlation.
+plt.figure(figsize=(5,4))
+sns.heatmap(df_5_area, annot=True, cmap='crest', fmt=".2f")
+plt.title('Correlation Heatmap')
+plt.xticks(np.arange(df_5_area.shape[1]) + 0.5, ['Store Area (sqft)', 'Customer Ratings', 'Sales', 'Revenue'], rotation=45, ha='right', rotation_mode='anchor')
+plt.yticks(np.arange(df_5_area.shape[0]) + 0.5, ['Store Area (sqft)', 'Customer Ratings', 'Sales', 'Revenue'], va='center')
+plt.show()
+
 # %% [markdown]
-# The result above shows that store area doesn't significantly affect either customer experiences, sales, nor revenue. Interestingly, larger store areas show a negative correlation with ratings, sales, and revenue suggesting that bigger spaces might not necessarily improve customer satisfaction. In addition, surprisingly, customer experiences also doesn't significantly affect either sales nor revenue and is on negative correlation, which means a higher rating results to lower sales and revenue.
+# The results above show that store area doesn't significantly affect customer experience, sales, or revenue. Interestingly, larger store areas exhibit a negative correlation with ratings, sales, and revenue, suggesting that bigger spaces might not necessarily lead to higher customer satisfaction. In addition, customer experience also doesn't significantly affect sales or revenue and even shows a negative correlation, meaning that higher ratings are associated with lower sales and revenue.
 
 # %% [markdown]
 # ## 6. Which category of product is the most popular in each city month-by-month?
@@ -274,13 +357,14 @@ print(df_6.head())
 
 # %%
 df_6['date'] = dtm(df_6['date'])
-print(df_6)
+print(df_6.head())
 
 # %% [markdown]
-# Count `net_units` by month and product's category while keeping the `city` data.
+# Count `net_units` by month and product category while keeping the `city` data.
 
 # %%
 df_6 = df_6.groupby(['date', 'category','city'], as_index=False)[['net_units']].sum()
+df_6['city'] = df_6['city'].str.replace(r'city_(\d)$', r'city_0\1', regex=True)
 # The above line will sum `net_units` data based on unique pairs of `date`, `category`, and 'city'.
 print(df_6.head())
 
@@ -292,25 +376,87 @@ city_dfs = {}
 separate(df_6, city_dfs, 'city')
 
 # %% [markdown]
-# Returns the highest sales product's category for each pair of month and place.
+# Returns the highest sales product category for each pair of month and place.
 
 # %%
 for city, df_city in city_dfs.items():
     df_city = df_city.loc[df_city.groupby(['date'])['net_units'].idxmax()]
     city_dfs[city] = df_city
-    print(city,':\n',df_city.head())
+    # print(city,':\n',df_city.head())
 
 # %% [markdown]
-# To simplify the pattern analyzation process, we can group by continuous segments with the same category as below.
+# To simplify pattern analysis, we can group by continuous segments with the same category as below.
 
 # %%
 for city, df_city in city_dfs.items():
-    # df_city = series_group(df_city)
-    df_city = series_group(df_city, 'category', 'net_units')
-    print(city,':\n',df_city)
+    df_city_series = series_group(df_city, 'category', 'net_units')
+    print(city,':\n',df_city_series)
+
+# %%
+# Visualize results as heatmap correlation.
+# Regroup dictionary to a DataFrame.
+df_cities = dfs_to_df(city_dfs, 'city')
+months = sorted(
+    df_cities['date'].unique(),
+    key=lambda s: pd.to_datetime(s + '-01', errors='coerce')
+)
+
+# Category mapping.
+# Use complete category from initial data.
+cats = list(pd.unique(df_6['category']))
+cat_dtype = pd.api.types.CategoricalDtype(categories=cats, ordered=False)
+df_cities['category'] = df_cities['category'].astype(cat_dtype)
+df_cities['cat_code'] = df_cities['category'].cat.codes  
+
+pivot = (
+    df_cities
+      .pivot(index='city', columns='date', values='cat_code')
+      .reindex(columns=months)           
+      .sort_index()
+)
+n_cats = len(cats)
+n_city = len(pivot)
+
+# Color palette settings.
+main_palette = sns.color_palette('Set3', 12)
+palette = [main_palette[i] for i in [1,0,2,4,7]]
+cmap = mcolors.ListedColormap(palette)
+bounds = np.arange(n_cats + 1) - 0.5
+norm = mcolors.BoundaryNorm(bounds, cmap.N)
+
+plt.figure(figsize=(15, 5))
+ax = sns.heatmap(
+    pivot, 
+    cmap=cmap, norm=norm, cbar=True,
+    linewidths=0.5, linecolor='white'
+)
+ax.set_title('Top Category per City (Month-by-Month)')
+ax.set_xlabel('Month')
+ax.set_ylabel('')
+
+# Month label (xticks) settings.
+for i, tick in enumerate(ax.get_xticklabels()):
+    show_every = max(1, len(months)//12)
+    tick.set_visible(i % show_every == 0)
+
+# Legend settings.
+cbar = ax.collections[0].colorbar
+cbar.set_ticks(np.arange(n_cats))
+cbar.set_ticklabels(cats)
+
+# Ticks settings.
+plt.xticks(rotation=45, ha='right')
+plt.yticks(
+    # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] + 0.5,
+    np.arange(n_city) + 0.5,
+    ['City 1','City 2', 'City 3', 'City 4', 'City 5', 'City 6', 'City 7', 'City 8', 'City 9', 'City 10'],
+    rotation='horizontal')
+
+plt.tight_layout()
+plt.show()
 
 # %% [markdown]
-# As shown above, each city displays different trends and preferences over time. However, the top product's category across those months and cities are always whether **Clothing** or **Home**.
+# As shown above, each city shows different trends and preferences over time. However, the top product category across those months and cities are always whether **Clothing** or **Home**.
 
 # %% [markdown]
 # ## 7. How does discount percentages on products affect store's sales and revenue?
@@ -326,6 +472,10 @@ for city, df_city in city_dfs.items():
 df_7 = df[['product_id','discount_pct','net_units','net_revenue']].copy()
 print(df_7.head())
 
+# %%
+# Check number of unique discount percentages to determine analysis approach.
+print(df_7[['discount_pct']].nunique())
+
 # %% [markdown]
 # Separate data by product ID to support product-based analysis process and to ensure every product carries equal weights.
 
@@ -340,25 +490,103 @@ print('prod_041:\n',disc_dfs['prod_041'].head())
 print('prod_022:\n',disc_dfs['prod_022'].head())
 
 # %% [markdown]
-# Find the correlation coefficients between `discount_pct`, `net_units`, and `net_revenue` for each product.
+# Calculate average sales and revenue for each level discount in each product.
 
 # %%
 for prod_id, df_disc in disc_dfs.items():
-    df_disc = df_disc[['discount_pct', 'net_units', 'net_revenue']].corr()
+    df_disc = df_disc.groupby('discount_pct')[['net_units', 'net_revenue']].mean()
     disc_dfs[prod_id] = df_disc
     # print('\n',prod_id,':\n',disc_dfs[prod_id])
 
 # %% [markdown]
-# Average correlation values to find general insights.
+# Find the mean difference percentages between variables (`discount_pct`, `net_units`, and `net_revenue`) to analyze the effect of discount to product sales and revenue.  
+# **Note:** The mean difference percentages are compared to baseline.
+
+# %%
+disc_dfs_mdiff = disc_dfs.copy()
+# print('Mean Difference Pencentages of Each Product:')
+for prod_id, df_disc in disc_dfs_mdiff.items():
+    df_disc = df_base_diff(df_disc)
+    disc_dfs_mdiff[prod_id] = df_disc
+    # print('\n',prod_id,':\n',disc_dfs_mdiff[prod_id])
+
+# %%
+# Visualize results as heatmap (Part 1).
+# Regroup dictionary to a DataFrame.
+df_discs = dfs_to_df(disc_dfs, 'prod_id', index_name='discount_pct')
+
+print(df_discs.head())
+
+# %%
+# Visualize results as heatmap (Part 2).
+pivot_sales = (
+    df_discs
+      .pivot(index='discount_pct', columns='prod_id', values='net_units')
+)
+pivot_rev = (
+    df_discs
+      .pivot(index='discount_pct', columns='prod_id', values='net_revenue')
+)
+
+fig, ax = plt.subplots(1, 2, figsize=(25,5))
+# Sales Heatmap
+sns.heatmap(
+    pivot_sales, ax=ax[0],
+    cmap='crest', 
+    cbar=True, cbar_kws={'label': 'Sales'},
+    linewidths=0.5, linecolor='white',
+)
+ax[0].set_title('Sales by Product and Discount')
+ax[0].set_xlabel('Product ID')
+ax[0].set_ylabel('Discount (%)')
+# Ticks settings.
+ax[0].set_xticks(np.arange(50) + 0.5)
+ax[0].set_xticklabels(np.arange(1, 51), rotation='horizontal', ha='center')
+ax[0].set_yticks(
+    np.arange(len(pivot_sales.index)),
+    pivot_sales.index,
+    rotation='horizontal', va='center')
+
+# Revenue Heatmap
+sns.heatmap(
+    pivot_rev, ax=ax[1],
+    cmap='crest', 
+    cbar=True, cbar_kws={'label': 'Revenue'},
+    linewidths=0.5, linecolor='white'
+)
+ax[1].set_title('Revenue by Product and Discount')
+ax[1].set_xlabel('Product ID')
+ax[1].set_ylabel('Discount (%)')
+# Ticks settings.
+ax[1].set_xticks(np.arange(50) + 0.5)
+ax[1].set_xticklabels(np.arange(1, 51), rotation='horizontal', ha='center')
+ax[1].set_yticks(
+    np.arange(len(pivot_rev.index)),
+    pivot_rev.index,
+    rotation='horizontal', va='center')
+
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+# Average mean difference percentages to find general insights.
 
 # %%
 disc_mat = []
 
-avg_disc_df = avg_corr(prod_id, df_disc, disc_dfs, disc_mat)
+avg_disc_df = avg_dfitem(prod_id, df_disc, disc_dfs_mdiff, disc_mat)
 print(avg_disc_df)
 
+# %%
+# Visualize results as barplot comparison.
+fig, ax = plt.subplots(1, 2, figsize=(10,4))
+plot_bar(avg_disc_df, 'discount_pct', 'net_units', 'Average Product Sales', 'Sales', ax=ax[0])
+plot_bar(avg_disc_df, 'discount_pct', 'net_revenue', 'Average Product Revenue', 'Revenue', ax=ax[1])
+plt.tight_layout()
+plt.show()
+
 # %% [markdown]
-# As shown above, discount percentages slightly impact sales and revenue. The higher the discount percentages, the higher the sales is. However, it is inversely proportional to the revenue.
+# As shown above, discount percentages slightly impact sales and revenue. The higher the discount percentages, the higher the sales is. However, by percentages, it is inversely proportional to the revenue, though by amount the impact doesn't show much.
 
 # %% [markdown]
 # ## 8. How does product's promotion affect store's sales and revenue?
@@ -388,25 +616,66 @@ print('prod_041:\n',promo_dfs['prod_041'].head())
 print('prod_022:\n',promo_dfs['prod_022'].head())
 
 # %% [markdown]
-# Find the correlation coefficients between `promotion`, `net_units`, and `net_revenue` for each product.
+# Find the mean difference percentages between variables (`promotion`, `net_units`, and `net_revenue`) to analyze the effect of promotion to product sales and revenue.
 
 # %%
-for prod_id, df_promo in promo_dfs.items():
-    df_promo = df_promo[['promotion', 'net_units', 'net_revenue']].corr()
-    promo_dfs[prod_id] = df_promo
-    # print(prod_id,':\n',df_promo)
+promo_dfs_mdiff = promo_dfs.copy()
+print("Effect of Promotion to Each Product's Sales and Revenue by Mean Difference Percentages:")
+for prod_id, df_promo in promo_dfs_mdiff.items():
+    df_promo = binary_mean_diff(df_promo, 'promotion', 'both')
+    df_promo = pd.DataFrame([df_promo])
+    promo_dfs_mdiff[prod_id] = df_promo
+
+promo_mdiffs = dfs_to_df(promo_dfs_mdiff, 'prod_id')
+print(promo_mdiffs.head())
+
+# %%
+# Visualize results as stacked bar plot.
+pivot_sales = (
+    df_8.groupby(['product_id', 'promotion'])[['net_units']]
+      .mean()
+      .unstack(fill_value=0)
+)
+pivot_sales.columns = ['No Promotion', 'Promotion']
+
+pivot_rev = (
+    df_8.groupby(['product_id', 'promotion'])[['net_revenue']]
+      .mean()
+      .unstack(fill_value=0)
+)
+pivot_rev.columns = ['No Promotion', 'Promotion']
+
+fig, ax = plt.subplots(1, 2, figsize=(25,5))
+
+# Sales stacked bar plot.
+plot_stackedbar(
+    pivot_sales,
+    'Sales by Product and Promotion', 
+    'Product ID', 'Sales',
+    50, ax=ax[0])
+
+# Revenue stacked bar plot.
+plot_stackedbar(
+    pivot_rev,
+    'Revenue by Product and Promotion', 
+    'Product ID', 'Revenue',
+    50, ax=ax[1])
+
+plt.tight_layout()
+plt.show()
 
 # %% [markdown]
-# Average correlation values to find general insights.
+# Calculate average mean difference percentages for each product.
 
 # %%
 promo_mat = []
 
-avg_promo_df = avg_corr(prod_id, df_promo, promo_dfs, promo_mat)
-print(avg_promo_df)
+avg_promo_df = avg_dfitem(prod_id, df_promo, promo_dfs_mdiff, promo_mat)
+print(f"Average effect of promotion on product sales: {avg_promo_df['sales_pct_diff'][0]:.2f}%")
+print(f"Average effect of promotion on product revenue: {avg_promo_df['rev_pct_diff'][0]:.2f}%")
 
 # %% [markdown]
-# As shown above, promotion affects sales and revenue. The impact is far greater than the impact of discount percentages. Moreover, promotion has directly proportional relations with both sales and revenue. The presence of promotion triggers higher sales and revenue.
+# As shown above, promotion significantly affects sales and revenue. Its impact is far greater than that of discount percentages—around 67.8%. Moreover, promotion has a directly proportional relationship with both sales and revenue, where the presence of promotion consistently leads to higher values in both.
 
 # %% [markdown]
 # ## 9. How does the combination of discount and promotion give different effect to store's sales and revenue?
@@ -452,16 +721,49 @@ print('prod_041:\n',comb_dfs['prod_041'])
 print('prod_022:\n',comb_dfs['prod_022'])
 
 # %% [markdown]
-# Average correlation values to find general insights.
+# Average mean values for each category to find general insights.
 
 # %%
 comb_mat = []
 
-avg_comb_df = cross_avg_mean(prod_id, df_comb, comb_dfs, comb_mat)
+avg_comb_df = avg_dfitem(prod_id, df_comb, comb_dfs, comb_mat, mode='cross')
 print(avg_comb_df)
 
+# %%
+# Visualize results as catplot.
+fig, ax = plt.subplots(1, 2, figsize=(15,5))
+
+# Sales catplot.
+sns.barplot(
+    avg_comb_df, ax=ax[0],
+    x='disc_group', y='net_units', hue='promo_group',
+    palette='crest'
+)
+ax[0].set_title('Sales by Discount and Promotion')
+ax[0].set_xlabel('')
+ax[0].set_ylabel('Sales')
+ax[0].set_xticks([0, 1, 2, 3], ['No Discount (0%)', 'Low Discount (0-10%)', 'Mid Discount (10-20%)', 'High Discount (20-30%)'])
+ax[0].legend(title='', labels=['No Promotion', 'Promotion'])
+pad_ylim(ax[0])
+
+# Revenue catplot.
+sns.barplot(
+    avg_comb_df, ax=ax[1],
+    x='disc_group', y='net_revenue', hue='promo_group',
+    palette='crest'
+)
+ax[1].set_title('Revenue by Discount and Promotion')
+ax[1].set_xlabel('')
+ax[1].set_ylabel('Revenue')
+ax[1].set_xticks([0, 1, 2, 3], ['No Discount (0%)', 'Low Discount (0-10%)', 'Mid Discount (10-20%)', 'High Discount (20-30%)'])
+ax[1].legend(title='', labels=['No Promotion', 'Promotion'])
+pad_ylim(ax[1])
+
+plt.tight_layout()
+plt.show()
+
 # %% [markdown]
-# As shown above, combination of discount and promotion gives different effect to sales and revenue. High discount with promotion results in highest sales, but no discount with promotion results in highest revenue. This affirm the two previous sections' result that promotion has greater positive impact to sales and revenue.
+# As shown above, the combination of discount and promotion produces varying effects on sales and revenue. A high discount combined with promotion results in the highest sales, while no discount with promotion yields the highest revenue. This finding affirms the results from the previous sections that promotion has a stronger positive impact on both sales and revenue.
 
 # %% [markdown]
 # ## 10. Does online transaction affect the customer experience (returns and rating)?
@@ -491,24 +793,67 @@ print('store_02:\n',cx_dfs['store_02'].head())
 print('store_06:\n',cx_dfs['store_06'].head())
 
 # %% [markdown]
-# Find the correlation coefficients between `online`, `returns`, and `avg_rating` for each store.
+# Find the mean difference percentages between variables (`online`, `returns`, and `avg_rating`) to analyze the effect of online transaction to customer experience.
 
 # %%
-for store_id, df_cx in cx_dfs.items():
-    df_cx = df_cx[['online', 'returns', 'avg_rating']].corr()
-    cx_dfs[store_id] = df_cx
-    print(store_id,':\n',df_cx)
+cx_dfs_mdiff = cx_dfs.copy()
+print("Effect of Online Transaction to Each Store's Customer Experience by Mean Difference Percentages:")
+for store_id, df_cx in cx_dfs_mdiff.items():
+    df_cx = {
+        'returns': binary_mean_diff(df_cx, condition='online', mode='returns'), 
+        'avg_rating': binary_mean_diff(df_cx, condition='online', mode='avg_rating')}
+    df_cx = pd.DataFrame([df_cx])
+    cx_dfs_mdiff[store_id] = df_cx
+
+cx_mdiff = dfs_to_df(cx_dfs_mdiff, 'store_id')
+print(cx_mdiff.head())
+
+# %%
+# Visualize results as stacked bar plot.
+pivot_returns = (
+    df_10.groupby(['store_id', 'online'])[['returns']]
+      .mean()
+      .unstack(fill_value=0)
+)
+pivot_returns.columns = ['Offline', 'Online']
+
+pivot_ratings = (
+    df_10.groupby(['store_id', 'online'])[['avg_rating']]
+      .mean()
+      .unstack(fill_value=0)
+)
+pivot_ratings.columns = ['Offline', 'Online']
+
+fig, ax = plt.subplots(1, 2, figsize=(10,5))
+
+# Returns stacked bar plot.
+plot_stackedbar(
+    pivot_returns, 
+    'Returns by Store and Transaction Method',
+    'Store ID', 'Returns',
+    10, ax=ax[0])
+
+# Ratings stacked bar plot.
+plot_stackedbar(
+    pivot_ratings, 
+    'Ratings by Store and Transaction Method',
+    'Store ID', 'Ratings',
+    10, ax=ax[1])
+
+plt.tight_layout()
+plt.show()
 
 # %% [markdown]
-# Average correlation values to find general insights.
+# Calculate average mean difference percentages for each store.
 
 # %%
 cx_mat = []
 
-avg_cx_df = avg_corr(store_id, df_cx, cx_dfs, cx_mat)
-print(avg_cx_df)
+avg_cx_df = avg_dfitem(store_id, df_cx, cx_dfs_mdiff, cx_mat)
+print(f"Average effect of online transaction on returns number: {avg_cx_df['returns'][0]:.2f}%")
+print(f"Average effect of online transaction on ratings: {avg_cx_df['avg_rating'][0]:.2f}%")
 
 # %% [markdown]
-# As shown above, the correlation values is too low so we can say online transaction doesn't affect customer experience.
+# As shown above, online transactions slightly affect both returns and ratings in a directly proportional manner. This is a surprising result, as an increase in returns usually corresponds to lower ratings.
 
 
