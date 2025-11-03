@@ -1,5 +1,5 @@
 # %% [markdown]
-# # Import all packages/library.
+# # Import All Packages/Library
 
 # %%
 import importlib
@@ -216,7 +216,7 @@ plt.tight_layout()
 plt.show()
 
 # %% [markdown]
-# Based on the results, the weekend increase overall daily sales and revenue by around 22,7%, a big number but still less significant than holiday.
+# Based on the results, the weekend increase overall daily sales and revenue by around 22.7%, a big number but still less significant than holiday.
 
 # %% [markdown]
 # ## 4. How is the overall day-by-day sales and revenue trend during a week?
