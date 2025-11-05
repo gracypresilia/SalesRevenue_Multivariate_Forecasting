@@ -1,4 +1,4 @@
-# Retail Sales Data Monthly Multivariate Forecasting
+# SalesRevenue_Multivariate_Forecasting
 This project focuses on forecasting monthly retail sales and revenue across multiple stores, product categories, and regions. Before building forecasting models, the dataset undergoes exploratory data analysis (EDA) to identify key drivers and relationships among variables such as discounts and promotions to net sales and revenue.
 
 ## Key Points
