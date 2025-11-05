@@ -11,7 +11,7 @@ This project focuses on forecasting monthly retail sales and revenue across mult
 2. **Exploratory Data Analysis (EDA):** Explored cleaned datasets to identify key variables and meaningful patterns.
 3. **Forecasting:** Built and evaluated SARIMAX models to predict future sales and revenue using significant exogenous variables derived from EDA.
 
-For detailed documentation, refer to the analysis process [here](https://github.com/gracypresilia/3_Sales_Data_Forecasting/blob/main/analyzation_process.md).
+For detailed documentation, refer to the analysis process [here](https://github.com/gracypresilia/Sales_Data_Forecasting/blob/main/analyzation_process.md).
 
 ## File Structure
 ```
@@ -28,8 +28,8 @@ For detailed documentation, refer to the analysis process [here](https://github.
 ├── model_net_revenue.pkl                       # Saved forecast model for revenue
 ├── model_net_units.pkl                         # Saved forecast model for sales
 ├── models_exog_scaler.pkl                      # Saved scaler for standardized exogenous variables
-├── README.md                                   # Project documentation
-└── requirements.txt                            # List of dependencies 
+├── requirements.txt                            # List of dependencies
+└── README.md                                   # Project documentation
 ```
 
 ## Future Work

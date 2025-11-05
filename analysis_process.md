@@ -48,7 +48,7 @@ These fixed variables define the unique combinations of each row and determine t
 - **seaborn:** Library to create advanced statistical plots.
 - **statsmodels (SARIMAX):** Library to develop models.
 
-**Note:** To install or check the library versions used in this project, refer [here](https://github.com/gracypresilia/3_Sales_Data_Forecasting/blob/main/requirements.txt).
+**Note:** To install or check the library versions used in this project, refer [here](https://github.com/gracypresilia/Sales_Data_Forecasting/blob/main/requirements.txt).
 
 ## Analysis Pipeline
 ### EDA (Exploratory Data Analysis)
