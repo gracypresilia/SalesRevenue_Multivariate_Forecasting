@@ -1,10 +1,9 @@
 # Retail Sales Data Monthly Multivariate Forecasting Analysis Process
-This project focuses on forecasting monthly retail sales and revenue across multiple stores, product categories, and regions.
-Before building forecasting models, the dataset undergoes exploratory data analysis (EDA) and regression analysis to identify key drivers and relationships among variables such as discounts, promotions, holidays, and online transactions.
+This project focuses on forecasting monthly retail sales and revenue across multiple stores, product categories, and regions. Before building forecasting models, the dataset undergoes exploratory data analysis (EDA) to identify key drivers and relationships among variables such as discounts and promotions to net sales and revenue.
 
 ## Raw Data
 ### Source
-- [Kaggle: Synthetic Retail Sales Data 2022–2024](https://www.kaggle.com/datasets/shivamja/synthetic-retail-sales-data-20222024)
+[Kaggle: Synthetic Retail Sales Data 2022–2024](https://www.kaggle.com/datasets/shivamja/synthetic-retail-sales-data-20222024)
 ### Columns Explanation
 - **Date**
     - `date`: 1096 unique dates from 1st January 2022 to 31st December 2024.
@@ -35,7 +34,20 @@ These fixed variables define the unique combinations of each row and determine t
     - `avg_rating`: Customers rating for each product in each unique conditions.
 
 ## Tools and Libraries
-...
+### Tools
+- **Visual Studio Code:** An IDE for writing, debugging, and running Python scripts in a streamlined development environment.
+- **Jupyter Notebook:** A code documentation tool that allows the use of both Markdown for text and Python for coding.
+- **Python:** A high-level programming language for data analysis.
+### Python Libraries
+- **importlib:** Library to reload `helper` script.
+- **joblib:** Library to export scaled exogenous variables values.
+- **matplotlib:** Library for creating data visualizations
+- **numpy:** Library to process numerical operations.
+- **pandas:** Library to handle, clean, and process DataFrames.
+- **scikit_learn:** Library to scale exogenous variables values and calculate models performance.
+- **seaborn:** Library to create advanced statistical plots.
+- **statsmodels (SARIMAX):** Library to develop models.
+**Note:** To install or check the library versions used in this project, refer [here](https://github.com/gracypresilia/3_Sales_Data_Forecasting/blob/main/requirements.txt)
 
 ## Analysis Pipeline
 ### EDA (Exploratory Data Analysis)
