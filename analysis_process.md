@@ -46,7 +46,8 @@ These fixed variables define the unique combinations of each row and determine t
 - **pandas:** Library to handle, clean, and process DataFrames.
 - **scikit_learn:** Library to scale exogenous variables values and calculate models performance.
 - **seaborn:** Library to create advanced statistical plots.
-- **statsmodels (SARIMAX):** Library to develop models.  
+- **statsmodels (SARIMAX):** Library to develop models.
+
 **Note:** To install or check the library versions used in this project, refer [here](https://github.com/gracypresilia/3_Sales_Data_Forecasting/blob/main/requirements.txt).
 
 ## Analysis Pipeline
@@ -81,15 +82,16 @@ These fixed variables define the unique combinations of each row and determine t
     - **Results:** The combination of discount and promotion produces **varying effects** on sales and revenue. A high discount combined with promotion results in the highest sales, while no discount with promotion yields the highest revenue. This finding affirms the results from the previous sections that promotion has a stronger positive impact on both sales and revenue.
 10. Does online transaction affect the customer experience (returns and rating)?
     - **Proposed Solution:** Find mean difference percentages between variables (`online`, `returns`, and `avg_rating`).
-    - **Results:** Online transactions slightly affect both returns and ratings in a **directly proportional** manner. This is a surprising result, as an increase in returns usually corresponds to lower ratings.  
+    - **Results:** Online transactions slightly affect both returns and ratings in a **directly proportional** manner. This is a surprising result, as an increase in returns usually corresponds to lower ratings.
+
 **Conclusions:**
 - 🆙 Holidays, weekends, and store type significantly boost sales and revenue.
 - 📈 Promotions have the largest positive impact, far surpassing discounts.
 - 📊 Store area and online transaction do not show meaningful positive correlations with performance metrics.
 - 🏷️ Across cities and months, Clothing and Home remain the dominant categories.
 ### Forecasting
-**Goal:** Predict future sales and revenue based on historical data.
-**Proposed Solution:** Build a monthly forecasting model using a multivariate time-series approach (SARIMAX).
+**Goal:** Predict future sales and revenue based on historical data.  
+**Proposed Solution:** Build a monthly forecasting model using a multivariate time-series approach (SARIMAX).  
 **Results:**
 1. Sales Forecasting
     - MAE: 100 | MAPE: **0.50%**
@@ -98,7 +100,8 @@ These fixed variables define the unique combinations of each row and determine t
 2. Revenue Forecasting
     - MAE: 12,912 | MAPE: **1.44%**
     - The revenue model exhibited small errors during peak months, but that's a reasonable outcome given the higher volatility of revenue data.
-    - In the residual plot, was slightly more sensitive which led to bias, suggesting the need for additional seasonal flexibility. However, it still adapted well over time.  
+    - In the residual plot, was slightly more sensitive which led to bias, suggesting the need for additional seasonal flexibility. However, it still adapted well over time.
+
 **Conclusions:** 
 - 🎯 The SARIMAX models successfully captured the monthly sales and revenue patterns by achieving strong accuracy on both metrics.
 - 🔍 While the sales model performs well in adapting to recent surges, the revenue model still shows mild bias at peak periods due to its higher volatility.
